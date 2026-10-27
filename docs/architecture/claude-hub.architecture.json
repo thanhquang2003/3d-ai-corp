@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "3D Claude Hub — kiến trúc",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "browser",
+      "type": "external",
+      "label": "Người dùng",
+      "sublabel": "Trình duyệt",
+      "pos": [
+        30,
+        190
+      ],
+      "size": [
+        140,
+        64
+      ]
+    },
+    {
+      "id": "appshell",
+      "type": "frontend",
+      "label": "AppShell",
+      "sublabel": "Next.js 16 · page.tsx",
+      "pos": [
+        230,
+        190
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "panels",
+      "type": "frontend",
+      "label": "UI Panels",
+      "sublabel": "Sessions · Tasks · Permission",
+      "pos": [
+        230,
+        50
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "stores",
+      "type": "database",
+      "label": "Zustand stores",
+      "sublabel": "World · Session",
+      "pos": [
+        480,
+        50
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "world3d",
+      "type": "frontend",
+      "label": "3D World",
+      "sublabel": "React Three Fiber",
+      "pos": [
+        720,
+        50
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "client",
+      "type": "frontend",
+      "label": "backendClient",
+      "sublabel": "chọn backend theo env",
+      "pos": [
+        480,
+        190
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "mock",
+      "type": "backend",
+      "label": "MockAgentBackend",
+      "sublabel": "SimulationEngine",
+      "pos": [
+        480,
+        330
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "chạy trong trình duyệt"
+    },
+    {
+      "id": "ws",
+      "type": "frontend",
+      "label": "WebSocketAgentBackend",
+      "sublabel": "protocol v1",
+      "pos": [
+        710,
+        190
+      ],
+      "size": [
+        170,
+        64
+      ]
+    },
+    {
+      "id": "server",
+      "type": "backend",
+      "label": "World Server",
+      "sublabel": "ws://127.0.0.1:8787",
+      "pos": [
+        720,
+        470
+      ],
+      "size": [
+        150,
+        64
+      ],
+      "tag": "ngoài repo"
+    },
+    {
+      "id": "claude",
+      "type": "external",
+      "label": "Claude Code",
+      "sublabel": "sessions · ~/.claude",
+      "pos": [
+        980,
+        470
+      ],
+      "size": [
+        150,
+        64
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Next.js app (app/)",
+      "wraps": [
+        "appshell",
+        "panels",
+        "stores",
+        "world3d",
+        "client",
+        "mock",
+        "ws"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "Máy local",
+      "wraps": [
+        "server",
+        "claude"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "open-page",
+      "from": "browser",
+      "to": "appshell",
+      "label": "HTTP"
+    },
+    {
+      "id": "render-panels",
+      "from": "appshell",
+      "to": "panels"
+    },
+    {
+      "id": "connect",
+      "from": "appshell",
+      "to": "client",
+      "label": "connectBackend"
+    },
+    {
+      "id": "client-ws",
+      "from": "client",
+      "to": "ws",
+      "label": "websocket",
+      "variant": "emphasis"
+    },
+    {
+      "id": "client-mock",
+      "from": "client",
+      "to": "mock",
+      "label": "mặc định",
+      "variant": "dashed",
+      "labelDy": 24
+    },
+    {
+      "id": "write-store",
+      "from": "client",
+      "to": "stores",
+      "label": "event + snapshot"
+    },
+    {
+      "id": "store-panels",
+      "from": "stores",
+      "to": "panels"
+    },
+    {
+      "id": "store-world",
+      "from": "stores",
+      "to": "world3d"
+    },
+    {
+      "id": "ws-server",
+      "from": "ws",
+      "to": "server",
+      "label": "WS + token",
+      "variant": "security",
+      "labelDy": 70
+    },
+    {
+      "id": "server-claude",
+      "from": "server",
+      "to": "claude",
+      "label": "hooks · prompt"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Frontend (trong repo)",
+      "items": [
+        "Next.js 16, một route /; 3D World bằng React Three Fiber",
+        "UI và 3D cùng đọc state từ Zustand"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Hai chế độ backend",
+      "items": [
+        "websocket → World Server điều khiển Claude Code thật",
+        "Mặc định → MockAgentBackend mô phỏng 6 agent"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Lưu ý",
+      "items": [
+        "Repo chỉ còn build .next; sơ đồ dựng lại từ source map",
+        "World Server không có trong repo"
+      ]
+    }
+  ]
+}
